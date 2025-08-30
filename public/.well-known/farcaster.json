@@ -13,5 +13,8 @@
     "buttonTitle": "Launch App",
     "splashImageUrl": "https://dystrycap.vercel.app/splash.png",
     "splashBackgroundColor": "#eeccff"
+  },
+    "baseBuilder": {
+    "allowedAddresses": ["0x242d770Bde0d3841AF75155936Eee7C309c2d158"]
   }
 }
