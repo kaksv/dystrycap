@@ -1,0 +1,31 @@
+{
+  "name": "DystryCap",
+  "short_name": "DystryCap",
+  "description": "DeFi Spending Cap Management",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f9fa",
+  "theme_color": "#675fd6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/FavIcon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/Full Logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/Full Logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["finance", "utilities"],
+  "lang": "en",
+  "dir": "ltr"
+}

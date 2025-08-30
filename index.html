@@ -3,19 +3,61 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/FavIcon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dystry Cap</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#675fd6" />
+    <meta name="description" content="DystryCap - DeFi Spending Cap Management" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="DystryCap" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="msapplication-TileColor" content="#675fd6" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Preconnect to external domains for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Load Inter font for better typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    
+    <title>DystryCap</title>
     <meta name="fc:miniapp" content='{
       "version":"1",
-      "imageUrl":"https://yoink.party/framesV2/opengraph-image",
-      "button":{
-        "title":"🚩 Delegate",
-        "action":{
-          "type":"launch_miniapp",
-          "name":"DystryCap!",
-          "splashImageUrl":"https://yoink.party/logo.png",
-          "splashBackgroundColor":"#f5f0ec"
-        }
+      "permissions":["identity","payments","user_data","notifications"],
+      "features":["payments","identity","user_data","notifications"],
+      "app_id":"dystrycap",
+      "app_name":"DystryCap",
+      "app_description":"DeFi Spending Cap Management",
+      "app_icon":"/FavIcon.svg",
+      "app_url":"https://dystrycap.com",
+      "app_version":"1.0.0",
+      "app_author":"DystryCap Team",
+      "app_license":"MIT",
+      "app_repository":"https://github.com/dystrycap/dystrycap",
+      "app_issues":"https://github.com/dystrycap/dystrycap/issues",
+      "app_documentation":"https://docs.dystrycap.com",
+      "app_support":"https://support.dystrycap.com",
+      "app_privacy":"https://dystrycap.com/privacy",
+      "app_terms":"https://dystrycap.com/terms",
+      "app_cookies":"https://dystrycap.com/cookies",
+      "app_analytics":"https://analytics.dystrycap.com",
+      "app_marketing":"https://marketing.dystrycap.com",
+      "app_blog":"https://blog.dystrycap.com",
+      "app_newsletter":"https://newsletter.dystrycap.com",
+      "app_social":{
+        "twitter":"https://twitter.com/dystrycap",
+        "discord":"https://discord.gg/dystrycap",
+        "telegram":"https://t.me/dystrycap",
+        "reddit":"https://reddit.com/r/dystrycap",
+        "github":"https://github.com/dystrycap",
+        "linkedin":"https://linkedin.com/company/dystrycap",
+        "youtube":"https://youtube.com/@dystrycap",
+        "twitch":"https://twitch.tv/dystrycap",
+        "instagram":"https://instagram.com/dystrycap",
+        "facebook":"https://facebook.com/dystrycap"
       }
     }' />
     <!-- For backward compatibility -->
