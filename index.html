@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/FavIcon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dystry Cap</title>
+    <meta name="fc:miniapp" content='{
+      "version":"1",
+      "imageUrl":"https://yoink.party/framesV2/opengraph-image",
+      "button":{
+        "title":"🚩 Delegate",
+        "action":{
+          "type":"launch_miniapp",
+          "name":"DystryCap!",
+          "splashImageUrl":"https://yoink.party/logo.png",
+          "splashBackgroundColor":"#f5f0ec"
+        }
+      }
+    }' />
+    <!-- For backward compatibility -->
+    <meta name="fc:frame" content='{
+      "version":"1",
+      "imageUrl":"https://yoink.party/framesV2/opengraph-image",
+      "button":{"title":"🚩 Delegate",
+      "action":{
+        "type":"launch_frame",
+        "name":"Delegate",
+        "url":"https://yoink.party/framesV2",
+        "splashImageUrl":"https://yoink.party/logo.png",
+        "splashBackgroundColor":"#f5f0ec"
+      }
+    }
+  }' />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

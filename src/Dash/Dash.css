@@ -1,0 +1,299 @@
+/* Header */
+.header {
+  background-color: var(--dark-back);
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+  padding:1.5rem;
+  border-radius: 4rem;
+  margin-left: 1.6rem;
+  margin-right: 1.6rem;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  backdrop-filter: blur(2rems);
+  height: 27px;
+
+}
+
+.logos {
+    height:2.5rem;
+    width:auto;
+
+
+}
+
+.header button {
+    color: var(--light-back);
+    background-color: inherit;
+    font-size: 1.2rem;
+    font-family: Haettenschweiler, sans-serif;
+    padding-left: 0.9rem;
+    padding-right:0.9rem;
+    padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
+    border-radius: 2rem;
+    cursor: pointer;
+    transition: ease-in 0.3s;
+    height: 30px;
+}
+
+.header button:hover {
+    color: var(--dark-back);
+    background-color: var(--light-back);
+    
+}
+
+.header button:active {
+    transform: scale(0.94);
+    transition: ease-in-out 0.07s;
+
+}
+
+#Logo {
+    padding-left: 2rem;
+    height: 3rem;
+    width: auto;
+}
+
+.connectButton {
+    padding-right: 3.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.3rem;
+    
+}
+
+#connectbtn {
+    /* border-style: solid; */
+    padding-top:3px;
+    padding-bottom:2.6px;
+    border: 2px solid white;
+}
+
+.connectButton h2 {
+    font-size: 1.1rem;
+}
+
+/* Content Area */
+.contentArea {
+    background-color: white;
+    color:black;
+    display: grid;
+    grid-template-columns: 1.5fr 1.3fr 1.5fr;
+    justify-content: space-around;
+    min-height: 82vh ;
+    margin:0.7rem;
+    margin-left: 2rem;
+    margin-right: 2rem;
+    border-radius: 2rem;
+    padding: 1rem;
+    
+}
+
+.contentArea * {
+    background-color: var(--light-back);
+    margin: 4px;
+    padding-left: 15px;
+    padding-right: 8px;
+    color: var(--dark-back);
+    border-radius: 15px;
+    
+}
+
+.contentArea * .hr {
+    color: var(--light-back);
+}
+
+/* Assigned Caps */
+
+.capbtns {
+    margin-top: 10px;
+    display: flex;
+}
+
+.capbtns button {
+    background-color: var(--dark-back);
+    color: var(--light-back);
+    font-size: 1.3rem;
+
+}
+
+.activeChainCaps { 
+    display: flex;
+    gap:0.2px;
+}
+
+.activeChainCaps img {
+    height: 1.2rem;
+    width:auto;
+
+}
+
+/* Caps by Chain */
+
+#AssignSecConnect {
+    display: flex;
+    align-items:center;
+    justify-content: center;
+}
+
+.caps {
+    padding-left:0;
+    margin-left:0;
+}
+
+.caps hr {
+    color: #675fd6
+
+}
+
+.CapsHead {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    padding-left:0;
+    margin-left:0;
+}
+
+.CapsHead h3 {
+    padding-left:0;
+    margin-left:0;
+}
+
+
+.CapsHead img {
+    height:2rem;
+    width: auto;
+    padding-left: 0;
+    margin-left: 0;
+}
+
+
+/* Spend Tokens Section */
+.spendContent {
+    padding-left:0;
+    margin-left:0;
+}
+
+
+.warning {
+    color: rgb(189, 22, 22);
+    padding:2px;
+    margin:2px;
+}
+
+#recepient {
+    padding:0;
+    margin:0;
+    margin-top:2.2rem;
+}
+
+#recepient h4 {
+    margin: 0;
+    padding: 7px;
+    margin-bottom: 0px;
+}
+
+#recepient input {
+    width: 85%;
+    height: 25px;
+    border: 1px solid var(--dark-back);
+    background-color: white;
+    font-size:0.94rem;
+    font-weight: 400;
+    font-style:inherit;
+    outline: none;
+}
+
+#recepient button {
+    border: none;
+    background-color: var(--dark-back);
+    color: var(--light-back);
+    font-size:1rem;
+    padding-top:2px;
+    padding-bottom:2px;
+    cursor:pointer;
+    transition: ease-in 0.3s;
+    height: 25px;
+    text-align:center;
+
+}
+
+#recepient button:hover {
+ color: var(--dark-back);
+background-color: var(--light-back);
+border: 1px solid var(--dark-back);
+
+}
+
+#recepient button:active {
+    transform: scale(0.94);
+    transition: ease-in-out 0.07s;
+}
+
+
+/* Accounts Delegation */
+.delegateContent {
+    padding-left:0;
+    margin-left:0;
+}
+
+.warning {
+    color: rgb(189, 22, 22);
+    padding:2px;
+    margin:2px;
+}
+
+#Delegate {
+    padding:0;
+    margin:0;
+    margin-top:2.2rem;
+}
+
+#Delegate h4 {
+    margin: 0;
+    padding: 7px;
+    margin-bottom: 0px;
+}
+
+#Delegate input {
+    width: 85%;
+    height: 25px;
+    border: 1px solid var(--dark-back);
+    background-color: white;
+    font-size:0.94rem;
+    font-weight: 400;
+    font-style:inherit;
+    outline: none;
+}
+
+#Delegate button {
+    border: none;
+    background-color: var(--dark-back);
+    color: var(--light-back);
+    font-size:1rem;
+    padding-top:2px;
+    padding-bottom:2px;
+    cursor:pointer;
+    transition: ease-in 0.3s;
+    height: 25px;
+    text-align:center;
+
+}
+
+#Delegate button:hover {
+ color: var(--dark-back);
+background-color: var(--light-back);
+border: 1px solid var(--dark-back);
+
+}
+
+#Delegate button:active {
+    transform: scale(0.94);
+    transition: ease-in-out 0.07s;
+}
+
+
+
+
