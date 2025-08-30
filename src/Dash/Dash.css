@@ -116,6 +116,7 @@
   align-items: center;
   justify-content: center;
   border: 2px solid transparent;
+  gap: var(--spacing-sm);
 }
 
 #connectbtn:hover:not(:disabled) {
@@ -133,6 +134,28 @@
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+/* Button spinner for loading state */
+.button-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid var(--dark-back);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Disconnect button styling */
+.disconnect-btn {
+  background: rgba(220, 53, 69, 0.1) !important;
+  color: var(--danger) !important;
+  border: 2px solid var(--danger) !important;
+}
+
+.disconnect-btn:hover {
+  background: var(--danger) !important;
+  color: var(--white) !important;
 }
 
 /* Status Messages */
@@ -155,6 +178,41 @@
   background: rgba(220, 53, 69, 0.1);
   color: var(--danger);
   border: 1px solid var(--danger);
+}
+
+.error-help {
+  margin-top: var(--spacing-md);
+  text-align: left;
+  background: rgba(255, 255, 255, 0.1);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.error-help p {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-weight: 600;
+}
+
+.error-help ol {
+  margin: 0;
+  padding-left: var(--spacing-lg);
+}
+
+.error-help li {
+  margin-bottom: var(--spacing-xs);
+  line-height: 1.4;
+}
+
+@media (max-width: 640px) {
+  .error-help {
+    text-align: center;
+  }
+  
+  .error-help ol {
+    display: inline-block;
+    text-align: left;
+  }
 }
 
 @keyframes slideDown {

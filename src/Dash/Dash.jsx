@@ -53,7 +53,22 @@ const Herodash = () => {
             if(_Provider){getCaps()}
         }
         catch(error){
-            setError(`Connection failed: ${error.message}`);
+            // Handle different types of errors gracefully
+            let errorMessage = 'Connection failed. Please try again.';
+            
+            if (error.code === 4001) {
+                errorMessage = 'Connection was rejected. Please approve the connection request in MetaMask.';
+            } else if (error.code === 'ACTION_REJECTED') {
+                errorMessage = 'Connection was cancelled. Please try again and approve the request.';
+            } else if (error.message && error.message.includes('user rejected')) {
+                errorMessage = 'Connection was rejected. Please approve the connection request in MetaMask.';
+            } else if (error.message && error.message.includes('ethers-user-denied')) {
+                errorMessage = 'Connection was denied. Please approve the connection request in MetaMask.';
+            } else if (error.message) {
+                errorMessage = `Connection failed: ${error.message}`;
+            }
+            
+            setError(errorMessage);
             console.error('Connection error:', error);
         } finally {
             setIsLoading(false);
@@ -179,8 +194,15 @@ const Herodash = () => {
                   if(Provider) getCaps()
               } 
           } catch(error){
-              setError('Failed to check accounts');
-              console.error('Check accounts error:', error);
+              // Handle permission errors silently - user might not have granted access yet
+              if (error.code === 4001 || error.code === 'ACTION_REJECTED' || 
+                  error.message?.includes('user rejected') || error.message?.includes('ethers-user-denied')) {
+                  // User hasn't granted permission yet, this is normal
+                  console.log('User has not granted MetaMask permissions yet');
+              } else {
+                  setError('Failed to check accounts. Please try refreshing the page.');
+                  console.error('Check accounts error:', error);
+              }
           }
       } 
 
@@ -196,6 +218,21 @@ const Herodash = () => {
                   setAssignedCaps([]);
               }
           })
+          
+          // Handle chain changes
+          window.ethereum.on('chainChanged', (chainId) => {
+              // Reload the page when chain changes to ensure proper state
+              window.location.reload();
+          });
+          
+          // Handle disconnect events
+          window.ethereum.on('disconnect', () => {
+              setIsConnected(false);
+              setAssignedCaps([]);
+              setProvider(null);
+              setSigner(null);
+              setAccounts([]);
+          });
       }
 
       return () => {
@@ -224,12 +261,20 @@ const Herodash = () => {
                     disabled={isLoading}
                     className={isLoading ? 'loading' : ''}
                 >
-                    {isLoading ? 'Connecting...' : 'Connect'}
+                    {isLoading ? (
+                        <>
+                            <div className="button-spinner"></div>
+                            Connecting...
+                        </>
+                    ) : (
+                        'Connect Wallet'
+                    )}
                 </button>
                 <button 
                     style = {{display: isConnected? 'flex' : 'none'}} 
                     onClick={disconnect} 
                     id='connectbtn'
+                    className="disconnect-btn"
                 >
                     Disconnect
                 </button>
@@ -240,6 +285,16 @@ const Herodash = () => {
         {(error || success) && (
             <div className={`status-message ${error ? 'error' : 'success'}`}>
                 {error || success}
+                {error && error.includes('rejected') && (
+                    <div className="error-help">
+                        <p>💡 <strong>How to connect:</strong></p>
+                        <ol>
+                            <li>Click "Connect" again</li>
+                            <li>In MetaMask, click "Connect" when prompted</li>
+                            <li>Make sure you're on the correct network</li>
+                        </ol>
+                    </div>
+                )}
             </div>
         )}
 
