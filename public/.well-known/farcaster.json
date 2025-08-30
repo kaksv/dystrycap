@@ -9,9 +9,7 @@
     "name": "Dystrycap",
     "iconUrl": "https://dystrycap.vercel.app/icon.png",
     "homeUrl": "https://dystrycap.vercel.app",
-    "imageUrl": "https://dystrycap.vercel.app/image.png",
     "buttonTitle": "Launch App",
-    "splashImageUrl": "https://dystrycap.vercel.app/splash.png",
     "splashBackgroundColor": "#eeccff"
   },
     "baseBuilder": {
