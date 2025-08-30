@@ -1,0 +1,17 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjgxMzMyMywidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweGVBOWY1MzM2MTg2NjdkMzY0RjdlMTc1NzA4QTg2MzY5Rjk4NzdFNzAifQ",
+    "payload": "eyJkb21haW4iOiJkeXN0cnljYXAudmVyY2VsLmFwcCJ9",
+    "signature": "MHhiMjA2NmQxYmNiNTIyZDQ1MDBkYjVhZGJhNDA4ZDM2NzIxMTRjOWRiZjU2N2I4YmRhNTM2YTdmNGViNzRmN2I1NDIzMWJjMWE4Y2Y5NWNiMmQ1ZTdiNDRhYWIwYjJmYjk4N2IyMTNkZjIxNzkxOTFlYTlhNmJiN2RmZWIwZjc4NzFi"
+  },
+  "frame": {
+    "version": "1",
+    "name": "Dystrycap",
+    "iconUrl": "https://dystrycap.vercel.app/icon.png",
+    "homeUrl": "https://dystrycap.vercel.app",
+    "imageUrl": "https://dystrycap.vercel.app/image.png",
+    "buttonTitle": "Launch App",
+    "splashImageUrl": "https://dystrycap.vercel.app/splash.png",
+    "splashBackgroundColor": "#eeccff"
+  }
+}
