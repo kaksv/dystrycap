@@ -31,6 +31,16 @@ const Herodash = () => {
   const [isDelegating, setIsDelegating] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  
+  // New state for wallet address input and spending history
+  const [inputWalletAddress, setInputWalletAddress] = useState('');
+  const [isCheckingCaps, setIsCheckingCaps] = useState(false);
+  const [userCaps, setUserCaps] = useState(null);
+  const [spendingHistory, setSpendingHistory] = useState([]);
+  
+  // Modal state management
+  const [isSpendModalOpen, setIsSpendModalOpen] = useState(false);
+  const [isDelegateModalOpen, setIsDelegateModalOpen] = useState(false);
 
   // ---Connect Function----
   const connect = async () => {
@@ -112,6 +122,59 @@ const Herodash = () => {
       }
   }
 
+  // Check spending caps for a specific wallet address
+  const checkWalletCaps = async (walletAddress) => {
+      if (!walletAddress || walletAddress.length !== 42 || !walletAddress.startsWith('0x')) {
+          setError('Please enter a valid wallet address');
+          return;
+      }
+
+      try {
+          setIsCheckingCaps(true);
+          setError('');
+          setSuccess('');
+
+          // Check allowance for the input wallet address
+          const USDC_ContractBase = new ethers.Contract(chainsConfig[1].tokenContractUSDC_Mainnet, ERC20_ABI, Provider)
+          const allowance = await USDC_ContractBase.allowance('0x8f6dB7206B7b617c14fd39B26f48AD36963a48Be', walletAddress)
+          
+          // Get balance of the wallet
+          const balance = await USDC_ContractBase.balanceOf(walletAddress)
+          
+          // Get spending history (this would typically come from events, but for demo we'll simulate)
+          const mockSpendingHistory = [
+              {
+                  hash: '0x1234...5678',
+                  amount: '100.00',
+                  timestamp: Date.now() - 86400000, // 1 day ago
+                  type: 'Spent'
+              },
+              {
+                  hash: '0x8765...4321',
+                  amount: '50.00',
+                  timestamp: Date.now() - 172800000, // 2 days ago
+                  type: 'Spent'
+              }
+          ];
+
+          setUserCaps({
+              address: walletAddress,
+              allowance: formatUnits(allowance.toString(), 6),
+              balance: formatUnits(balance.toString(), 6),
+              remaining: formatUnits(allowance.sub(balance).toString(), 6)
+          });
+          
+          setSpendingHistory(mockSpendingHistory);
+          setSuccess(`Found spending caps for ${walletAddress.substring(0,6)}...${walletAddress.substring(walletAddress.length-4)}`);
+          
+      } catch (error) {
+          setError(`Failed to check wallet caps: ${error.message}`);
+          console.error('Check wallet caps error:', error);
+      } finally {
+          setIsCheckingCaps(false);
+      }
+  }
+
   const Spend = async () => {
       if (!RecepientAcc || !AmounttoSpend) {
           setError('Please fill in all fields');
@@ -183,6 +246,46 @@ const Herodash = () => {
       }
   }, [success, error]);
 
+  // Modal management functions
+  const openSpendModal = () => setIsSpendModalOpen(true);
+  const closeSpendModal = () => setIsSpendModalOpen(false);
+  const openDelegateModal = () => setIsDelegateModalOpen(true);
+  const closeDelegateModal = () => setIsDelegateModalOpen(false);
+
+  // Close modal when clicking outside
+  const handleModalBackdropClick = (e) => {
+      if (e.target === e.currentTarget) {
+          closeSpendModal();
+          closeDelegateModal();
+      }
+  };
+
+  // Close modal on escape key
+  useEffect(() => {
+      const handleEscape = (e) => {
+          if (e.key === 'Escape') {
+              closeSpendModal();
+              closeDelegateModal();
+          }
+      };
+
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+  }, []);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+      if (isSpendModalOpen || isDelegateModalOpen) {
+          document.body.classList.add('modal-open');
+      } else {
+          document.body.classList.remove('modal-open');
+      }
+
+      return () => {
+          document.body.classList.remove('modal-open');
+      };
+  }, [isSpendModalOpen, isDelegateModalOpen]);
+
   // Check for Account Change and Check for Connected accounts
   useEffect(()=>{
       const check = async () => {
@@ -247,37 +350,47 @@ const Herodash = () => {
         {/* Dashboard */}
         <div className='header'>
             {/* Header */}
-            <div className='Logo'>
-                <img src={Logo} id='Logo' alt="DystryCap Logo" />
-            </div>
-            <div className='connectButton'>
-                { isConnected && Accounts ? 
-                    <h2>{`${Accounts[0].substring(0,6)}...${Accounts[0].substring(Accounts[0].length-4)}`}</h2> : ''
-                }
-                <button 
-                    style = {{display: isConnected ? 'none' : 'flex'}} 
-                    onClick={connect} 
-                    id='connectbtn'
-                    disabled={isLoading}
-                    className={isLoading ? 'loading' : ''}
-                >
-                    {isLoading ? (
-                        <>
-                            <div className="button-spinner"></div>
-                            Connecting...
-                        </>
-                    ) : (
-                        'Connect Wallet'
+            <div className='header-content'>
+                <div className='Logo'>
+                    <img src={Logo} id='Logo' alt="DystryCap Logo" />
+                </div>
+                <div className='connectButton'>
+                    <button 
+                        style = {{display: isConnected ? 'none' : 'flex'}} 
+                        onClick={connect} 
+                        id='connectbtn'
+                        disabled={isLoading}
+                        className={isLoading ? 'loading' : ''}
+                    >
+                        {isLoading ? (
+                            <>
+                                <div className="button-spinner"></div>
+                                Connecting...
+                            </>
+                        ) : (
+                            'Connect'
+                        )}
+                    </button>
+                    {isConnected && Accounts && (
+                        <div className="connected-info">
+                            <span className="address-display">
+                                {`${Accounts[0].substring(0,3)}...${Accounts[0].substring(Accounts[0].length-3)}`}
+                            </span>
+                            <button 
+                                onClick={disconnect} 
+                                id='disconnectbtn'
+                                className="disconnect-btn"
+                                title="Disconnect Wallet"
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M16 17L21 12L16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </button>
+                        </div>
                     )}
-                </button>
-                <button 
-                    style = {{display: isConnected? 'flex' : 'none'}} 
-                    onClick={disconnect} 
-                    id='connectbtn'
-                    className="disconnect-btn"
-                >
-                    Disconnect
-                </button>
+                </div>
             </div>
         </div>
 
@@ -308,9 +421,83 @@ const Herodash = () => {
               </div>
           ) : (
               <div className='Assigned Spending Caps'>
-                  <h2 className='section_head'>Assigned Spending Caps</h2>
+                  <h2 className='section_head'>Check Wallet Spending Caps</h2>
                   <hr className='hr'/>
                   
+                  {/* Wallet Address Input */}
+                  <div className="wallet-input-section">
+                      <div className="input-group">
+                          <input
+                              type="text"
+                              placeholder="Enter wallet address (0x...)"
+                              value={inputWalletAddress}
+                              onChange={(e) => setInputWalletAddress(e.target.value)}
+                              className="wallet-address-input"
+                          />
+                          <button
+                              onClick={() => checkWalletCaps(inputWalletAddress)}
+                              disabled={isCheckingCaps || !inputWalletAddress}
+                              className="check-caps-btn"
+                          >
+                              {isCheckingCaps ? (
+                                  <>
+                                      <div className="button-spinner"></div>
+                                      Checking...
+                                  </>
+                              ) : (
+                                  'Check Caps'
+                              )}
+                          </button>
+                      </div>
+                  </div>
+
+                  {/* Display User Caps */}
+                  {userCaps && (
+                      <div className="user-caps-display">
+                          <h3>Spending Caps for {userCaps.address.substring(0,6)}...{userCaps.address.substring(userCaps.address.length-4)}</h3>
+                          <div className="caps-summary">
+                              <div className="cap-item">
+                                  <span className="cap-label">Total Allowance:</span>
+                                  <span className="cap-value">{userCaps.allowance} USDC</span>
+                              </div>
+                              <div className="cap-item">
+                                  <span className="cap-label">Current Balance:</span>
+                                  <span className="cap-value">{userCaps.balance} USDC</span>
+                              </div>
+                              <div className="cap-item">
+                                  <span className="cap-label">Remaining to Spend:</span>
+                                  <span className="cap-value remaining">{userCaps.remaining} USDC</span>
+                              </div>
+                          </div>
+                          
+                          {/* Spending History */}
+                          <div className="spending-history">
+                              <h4>Recent Spending History</h4>
+                              {spendingHistory.length > 0 ? (
+                                  <div className="history-list">
+                                      {spendingHistory.map((item, index) => (
+                                          <div key={index} className="history-item">
+                                              <div className="history-details">
+                                                  <span className="history-type">{item.type}</span>
+                                                  <span className="history-amount">{item.amount} USDC</span>
+                                              </div>
+                                              <div className="history-meta">
+                                                  <span className="history-hash">{item.hash}</span>
+                                                  <span className="history-time">
+                                                      {new Date(item.timestamp).toLocaleDateString()}
+                                                  </span>
+                                              </div>
+                                          </div>
+                                      ))}
+                                  </div>
+                              ) : (
+                                  <p className="no-history">No spending history found</p>
+                              )}
+                          </div>
+                      </div>
+                  )}
+
+                  {/* Original Caps Display (commented out) */}
                   {isLoading ? (
                       <div className="loading-state">
                           <div className="spinner"></div>
@@ -346,8 +533,8 @@ const Herodash = () => {
                               <div className='capsData'>
                                   <h4>{AssignedCaps[2] ? `${AssignedCaps[2]} USDT` : 'No Spending Cap found'}</h4>
                               </div>
-                          </div> */}
-                          {/* <hr/>
+                          </div>
+                          <hr/>
                           <div className='Caps'>
                               <div className = 'CapsHead' >
                                   <img src={Arb} alt="Arbitrum" />
@@ -356,8 +543,8 @@ const Herodash = () => {
                               <div className='capsData'>
                                   <h4>{AssignedCaps[3] ? `${AssignedCaps[3]} USDT` : 'No Spending Cap found'}</h4>
                               </div>
-                          </div> */}
-                          {/* <hr/>
+                          </div>
+                          <hr/>
                           <div className='Caps'>
                               <div className = 'CapsHead' >
                                   <img src={Op} alt="Optimism" />
@@ -367,8 +554,8 @@ const Herodash = () => {
                                   <h4>{AssignedCaps[4] ? `${AssignedCaps[4]} USDT` : 'No Spending Cap found'}</h4>
                               </div>
                           </div>
-                          <hr/> */}
-                          {/* <div className='Caps'>
+                          <hr/>
+                          <div className='Caps'>
                               <div className = 'CapsHead' >
                                   <img src={Uni} alt="Unichain" />
                                   <h3>Unichain Sepolia</h3>
@@ -383,82 +570,146 @@ const Herodash = () => {
               </div>
           )}
           
-          {/* Spend Tokens Section */}
-          <div>
-              <h2 className='head'>Spend Tokens</h2>
+          {/* Action Buttons Section */}
+          <div className="action-buttons-section">
+              <h2 className='head'>Token Actions</h2>
               <hr className='hr'/>
-              <div className='spendContent'>  
-                  <h5 className='warning'>
-                      Note: You can only spend tokens on the active chain. Switch to desired chain
-                  </h5>
-                  <div id='recepient'>
-                      <h4>Enter recipient's address</h4>
-                      <input 
-                          type="text" 
-                          placeholder='0xF94CC1Eb19C43d73Eec9e55c13494abe1dfFb648' 
-                          value={RecepientAcc} 
-                          onChange={(e)=>{setRecepient(e.target.value);}}
-                          disabled={!isConnected}
-                      />
-                      <h4>Enter amount</h4>
-                      <input 
-                          type="number" 
-                          placeholder='0.25' 
-                          value={AmounttoSpend} 
-                          onChange={(e)=>{setAmounttoSpend(e.target.value);}}
-                          disabled={!isConnected}
-                          step="0.01"
-                          min="0"
-                      />
-                      <button 
-                          onClick={Spend}
-                          disabled={!isConnected || isSpending || !RecepientAcc || !AmounttoSpend}
-                          className={isSpending ? 'loading' : ''}
-                      >
-                          {isSpending ? 'Sending...' : 'Send USDC'}
-                      </button>
-                  </div>
-              </div>
-          </div>
-          
-          {/* Delegate Section */}
-          <div>
-              <h2 className='head'>Assign Spending Amounts</h2>
-              <hr className='hr'/>
-              <div className='delegateContent'>  
-                  <h5 className='warning'>
-                      Note: You can only delegate tokens on the active chain. Switch to desired chain
-                  </h5>
-                  <div id='Delegate'>
-                      <h4>Enter delegate's address</h4>
-                      <input 
-                          type="text" 
-                          placeholder='0xF94CC1Eb19C43d73Eec9e55c13494abe1dfFb648' 
-                          value={DelegatedAcc} 
-                          onChange={(e)=>{setDelegate(e.target.value)}} 
-                          disabled={!isConnected}
-                      />
-                      <h4>Enter amount</h4>
-                      <input 
-                          type="number" 
-                          placeholder='0.25' 
-                          value={AmounttoDelegate} 
-                          onChange={(e)=>{setAmounttoDelegate(e.target.value);}}
-                          disabled={!isConnected}
-                          step="0.01"
-                          min="0"
-                      />
-                      <button 
-                          onClick={Delegate}
-                          disabled={!isConnected || isDelegating || !DelegatedAcc || !AmounttoDelegate}
-                          className={isDelegating ? 'loading' : ''}
-                      >
-                          {isDelegating ? 'Delegating...' : 'Delegate'}
-                      </button>
-                  </div>
+              
+              <div className="action-buttons-grid">
+                  <button 
+                      className="action-button spend-button"
+                      onClick={openSpendModal}
+                      disabled={!isConnected}
+                  >
+                      <div className="action-icon">💸</div>
+                      <div className="action-content">
+                          <h3>Spend Tokens</h3>
+                          <p>Send USDC tokens to another address</p>
+                      </div>
+                  </button>
+                  
+                  <button 
+                      className="action-button delegate-button"
+                      onClick={openDelegateModal}
+                      disabled={!isConnected}
+                  >
+                      <div className="action-icon">🔐</div>
+                      <div className="action-content">
+                          <h3>Assign Spending Amounts</h3>
+                          <p>Delegate spending authority to another address</p>
+                      </div>
+                  </button>
               </div>
           </div>
         </div>
+
+        {/* Spend Tokens Modal */}
+        {isSpendModalOpen && (
+            <div className="modal-overlay" onClick={handleModalBackdropClick}>
+                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                    <div className="modal-header">
+                        <h2>Spend Tokens</h2>
+                        <button className="modal-close" onClick={closeSpendModal}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div className="modal-body">
+                        <div className='unified-note'>
+                            <div className='note-icon'>ℹ️</div>
+                            <div className='note-content'>
+                                <h5>Network Requirement</h5>
+                                <p>You can only spend tokens on Base mainnet. Make sure you are connected to Base network.</p>
+                            </div>
+                        </div>
+                        
+                        <div id='recepient'>
+                            <h4>Enter recipient's address</h4>
+                            <input 
+                                type="text" 
+                                placeholder='0xF94CC1Eb19C43d73Eec9e55c13494abe1dfFb648' 
+                                value={RecepientAcc} 
+                                onChange={(e)=>{setRecepient(e.target.value);}}
+                                disabled={!isConnected}
+                            />
+                            <h4>Enter amount</h4>
+                            <input 
+                                type="number" 
+                                placeholder='0.25' 
+                                value={AmounttoSpend} 
+                                onChange={(e)=>{setAmounttoSpend(e.target.value);}}
+                                disabled={!isConnected}
+                                step="0.01"
+                                min="0"
+                            />
+                            <button 
+                                onClick={Spend}
+                                disabled={!isConnected || isSpending || !RecepientAcc || !AmounttoSpend}
+                                className={isSpending ? 'loading' : ''}
+                            >
+                                {isSpending ? 'Sending...' : 'Send USDC'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* Delegate Modal */}
+        {isDelegateModalOpen && (
+            <div className="modal-overlay" onClick={handleModalBackdropClick}>
+                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                    <div className="modal-header">
+                        <h2>Assign Spending Amounts</h2>
+                        <button className="modal-close" onClick={closeDelegateModal}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div className="modal-body">
+                        <div className='unified-note'>
+                            <div className='note-icon'>ℹ️</div>
+                            <div className='note-content'>
+                                <h5>Network Requirement</h5>
+                                <p>You can only delegate tokens on Base mainnet. Make sure you are connected to Base network.</p>
+                            </div>
+                        </div>
+                        
+                        <div id='Delegate'>
+                            <h4>Enter delegate's address</h4>
+                            <input 
+                                type="text" 
+                                placeholder='0xF94CC1Eb19C43d73Eec9e55c13494abe1dfFb648' 
+                                value={DelegatedAcc} 
+                                onChange={(e)=>{setDelegate(e.target.value)}} 
+                                disabled={!isConnected}
+                            />
+                            <h4>Enter amount</h4>
+                            <input 
+                                type="number" 
+                                placeholder='0.25' 
+                                value={AmounttoDelegate} 
+                                onChange={(e)=>{setAmounttoDelegate(e.target.value);}}
+                                disabled={!isConnected}
+                                step="0.01"
+                                min="0"
+                            />
+                            <button 
+                                onClick={Delegate}
+                                disabled={!isConnected || isDelegating || !DelegatedAcc || !AmounttoDelegate}
+                                className={isDelegating ? 'loading' : ''}
+                            >
+                                {isDelegating ? 'Delegating...' : 'Delegate'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )}
     </div>
   )
 }
