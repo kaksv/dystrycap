@@ -15,6 +15,20 @@ export const chainsConfig = [
         tokenContractUSDC_Mainnet:'	0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
         assignedCap:{}
     },
+    {
+        chainId: '0x2105',
+       chainName: 'Base',
+       nativeCurrency: {
+           name: 'ETH',
+           symbol: 'ETH',
+           decimals: 18
+       },
+       rpcUrls:['https://base.drpc.org'],
+       blockExplorerUrls:['https://basescan.org/'],
+       tokenContractUSDC_Testnet:'0x036CbD53842c5426634e7929541eC2318f3dCF7e',
+       tokenContractUSDC_Mainnet:'0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+       assignedCap:{}
+   },
 
    {  
         chainId: '0xaef3',
@@ -45,6 +59,8 @@ export const chainsConfig = [
         tokenContractUSDC_Mainnet:'0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         assignedCap:{}
     },
+
+
 
     {
          chainId: '0x66eee',

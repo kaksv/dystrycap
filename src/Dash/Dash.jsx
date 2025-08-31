@@ -99,7 +99,7 @@ const Herodash = () => {
           setIsLoading(true);
           const Caps = []
 
-          const USDC_ContractBase = new ethers.Contract(chainsConfig[0].tokenContractUSDC_Testnet, ERC20_ABI, Provider)
+          const USDC_ContractBase = new ethers.Contract(chainsConfig[1].tokenContractUSDC_Mainnet, ERC20_ABI, Provider)
           const AmountBase = await USDC_ContractBase.allowance('0x8f6dB7206B7b617c14fd39B26f48AD36963a48Be',Accounts[0])
           Caps.push(formatUnits(AmountBase.toString(),6))
           
@@ -321,14 +321,14 @@ const Herodash = () => {
                           <div className='Caps'>
                               <div className = 'CapsHead' >
                                   <img src={Base} alt="Base" />
-                                  <h3>Base Sepolia</h3>
+                                  <h3>Base</h3>
                               </div>
                               <div className='capsData'>
                                   <h4>{AssignedCaps[0] ? `${AssignedCaps[0]} USDT` : 'No Spending Cap found'}</h4>
                               </div>
                           </div>
                           <hr/> 
-                          <div className='Caps'>
+                          {/* <div className='Caps'>
                               <div className = 'CapsHead' >
                                   <img src={Celo} alt="Celo" />
                                   <h3>Celo Alfajores</h3>
@@ -336,8 +336,8 @@ const Herodash = () => {
                               <div className='capsData'>
                                   <h4>{+AssignedCaps[1] ? `${AssignedCaps[1]} USDT` : 'No Spending Cap found'}</h4>
                               </div>
-                          </div>
-                          <hr/>
+                          </div> */}
+                          {/* <hr/>
                           <div className='Caps'>
                               <div className = 'CapsHead' >
                                   <img src={Eth} alt="Ethereum" />
@@ -346,8 +346,8 @@ const Herodash = () => {
                               <div className='capsData'>
                                   <h4>{AssignedCaps[2] ? `${AssignedCaps[2]} USDT` : 'No Spending Cap found'}</h4>
                               </div>
-                          </div>
-                          <hr/>
+                          </div> */}
+                          {/* <hr/>
                           <div className='Caps'>
                               <div className = 'CapsHead' >
                                   <img src={Arb} alt="Arbitrum" />
@@ -356,8 +356,8 @@ const Herodash = () => {
                               <div className='capsData'>
                                   <h4>{AssignedCaps[3] ? `${AssignedCaps[3]} USDT` : 'No Spending Cap found'}</h4>
                               </div>
-                          </div>
-                          <hr/>
+                          </div> */}
+                          {/* <hr/>
                           <div className='Caps'>
                               <div className = 'CapsHead' >
                                   <img src={Op} alt="Optimism" />
@@ -367,8 +367,8 @@ const Herodash = () => {
                                   <h4>{AssignedCaps[4] ? `${AssignedCaps[4]} USDT` : 'No Spending Cap found'}</h4>
                               </div>
                           </div>
-                          <hr/>
-                          <div className='Caps'>
+                          <hr/> */}
+                          {/* <div className='Caps'>
                               <div className = 'CapsHead' >
                                   <img src={Uni} alt="Unichain" />
                                   <h3>Unichain Sepolia</h3>
@@ -377,7 +377,7 @@ const Herodash = () => {
                                   <h4>{AssignedCaps[5] ? `${AssignedCaps[5]} USDT` : 'No Spending Cap found'}</h4>
                               </div>
                           </div>
-                          <hr/>
+                          <hr/> */}
                       </div>
                   )}
               </div>
