@@ -12,7 +12,7 @@ export const chainsConfig = [
         rpcUrls:['https://sepolia.base.org'],
         blockExplorerUrls:['https://base-sepolia.blockscout.com/'],
         tokenContractUSDC_Testnet:'0x036CbD53842c5426634e7929541eC2318f3dCF7e',
-        tokenContractUSDC_Mainnet:'	0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+        tokenContractUSDC_Mainnet:'0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
         assignedCap:{}
     },
     {

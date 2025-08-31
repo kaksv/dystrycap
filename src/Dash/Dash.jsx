@@ -20,8 +20,8 @@ const Herodash = () => {
   const [DelegatedAcc,setDelegate] = useState()
   const [AssignedCaps,setAssignedCaps] = useState([])
   const [ActiveChain,setActiveChain] = useState()
-  const [AmounttoSpend,setAmounttoSpend] = useState()
-  const [AmounttoDelegate,setAmounttoDelegate] = useState()
+  const [AmounttoSpend,setAmounttoSpend] = useState('')
+  const [AmounttoDelegate,setAmounttoDelegate] = useState('')
   const [SendHash,setSendHash] = useState('')
   const [DelegateHash,setDelegateHash] = useState('')
   
@@ -41,6 +41,14 @@ const Herodash = () => {
   // Modal state management
   const [isSpendModalOpen, setIsSpendModalOpen] = useState(false);
   const [isDelegateModalOpen, setIsDelegateModalOpen] = useState(false);
+  
+  // Pending action after network switch
+  const [pendingAction, setPendingAction] = useState(null);
+  
+  // Helper function to validate Ethereum addresses
+  const isValidEthereumAddress = (address) => {
+      return /^0x[a-fA-F0-9]{40}$/.test(address);
+  };
 
   // ---Connect Function----
   const connect = async () => {
@@ -114,7 +122,70 @@ const Herodash = () => {
     } else {
         setError('MetaMask not found. Please install MetaMask to continue.');
     }
-}
+  }
+
+  //---Switch to Base Network Function----
+  const switchToBaseNetwork = async () => {
+      try {
+          await window.ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: '0x2105' }], // Base mainnet
+          });
+          setSuccess('Switched to Base mainnet successfully!');
+          
+          // Execute pending action if any
+          if (pendingAction) {
+              setTimeout(() => {
+                  executePendingAction();
+              }, 1000); // Small delay to ensure network switch is complete
+          }
+      } catch (switchError) {
+          // This error code indicates that the chain has not been added to MetaMask
+          if (switchError.code === 4902) {
+              try {
+                  await window.ethereum.request({
+                      method: 'wallet_addEthereumChain',
+                      params: [{
+                          chainId: '0x2105',
+                          chainName: 'Base',
+                          nativeCurrency: {
+                              name: 'ETH',
+                              symbol: 'ETH',
+                              decimals: 18
+                          },
+                          rpcUrls: ['https://base.drpc.org'],
+                          blockExplorerUrls: ['https://basescan.org/']
+                      }]
+                  });
+                  setSuccess('Base mainnet added and switched successfully!');
+                  
+                  // Execute pending action if any
+                  if (pendingAction) {
+                      setTimeout(() => {
+                          executePendingAction();
+                      }, 1000); // Small delay to ensure network switch is complete
+                  }
+              } catch (addError) {
+                  setError('Failed to add Base mainnet to MetaMask');
+                  console.error('Add chain error:', addError);
+              }
+          } else {
+              setError('Failed to switch to Base mainnet');
+              console.error('Switch chain error:', switchError);
+          }
+      }
+  }
+
+  //---Execute Pending Action Function----
+  const executePendingAction = async () => {
+      if (pendingAction === 'delegate') {
+          setPendingAction(null);
+          await Delegate();
+      } else if (pendingAction === 'spend') {
+          setPendingAction(null);
+          await Spend();
+      }
+  }
 
   //---Disconnect Function----
   const disconnect = async () => {
@@ -160,14 +231,28 @@ const Herodash = () => {
               return;
           }
           
+          if (!Provider) {
+              console.log('No provider available for getCaps');
+              return;
+          }
+          
           setIsLoading(true);
           const Caps = []
 
-          const USDC_ContractBase = new ethers.Contract(chainsConfig[1].tokenContractUSDC_Mainnet, ERC20_ABI, Provider)
-          const AmountBase = await USDC_ContractBase.allowance('0x8f6dB7206B7b617c14fd39B26f48AD36963a48Be',Accounts[0])
-          Caps.push(formatUnits(AmountBase.toString(),6))
-          
-          setAssignedCaps(Caps)
+          try {
+              const USDC_ContractBase = new ethers.Contract(chainsConfig[1].tokenContractUSDC_Mainnet, ERC20_ABI, Provider)
+              const AmountBase = await USDC_ContractBase.allowance('0x8f6dB7206B7b617c14fd39B26f48AD36963a48Be', Accounts[0])
+              
+              // Ensure AmountBase is a BigNumber
+              const amountBN = ethers.BigNumber.from(AmountBase);
+              Caps.push(formatUnits(amountBN.toString(), 6))
+              
+              setAssignedCaps(Caps)
+          } catch (contractError) {
+              console.error('Contract call error in getCaps:', contractError);
+              // Set empty caps if contract call fails
+              setAssignedCaps([])
+          }
       } catch (error) {
           setError('Failed to fetch spending caps. Please try again.');
           console.error('Get caps error:', error);
@@ -183,17 +268,109 @@ const Herodash = () => {
           return;
       }
 
+          if (!Provider) {
+              setError('No provider available. Please connect your wallet first.');
+              return;
+          }
+          
+          // Validate contract address
+          if (!chainsConfig[1] || !chainsConfig[1].tokenContractUSDC_Mainnet) {
+              setError('Invalid contract configuration. Please check the network settings.');
+              return;
+          }
+          
+          // Check if user is on the correct network (Base mainnet)
+          try {
+              const currentChainId = await window.ethereum.request({method: "eth_chainId"});
+              if (currentChainId !== '0x2105') { // Base mainnet chain ID
+                  setError('Please switch to Base mainnet to check wallet caps. Click the button below to switch networks.');
+                  setPendingAction('checkCaps');
+                  return;
+              }
+          } catch (error) {
+              console.error('Failed to check chain ID:', error);
+              setError('Failed to verify network. Please try again.');
+              return;
+          }
+
       try {
           setIsCheckingCaps(true);
           setError('');
           setSuccess('');
 
           // Check allowance for the input wallet address
-          const USDC_ContractBase = new ethers.Contract(chainsConfig[1].tokenContractUSDC_Mainnet, ERC20_ABI, Provider)
-          const allowance = await USDC_ContractBase.allowance('0x8f6dB7206B7b617c14fd39B26f48AD36963a48Be', walletAddress)
+          const delegatorAddress = '0x8f6dB7206B7b617c14fd39B26f48AD36963a48Be';
+          const contractAddress = chainsConfig[1].tokenContractUSDC_Mainnet;
           
-          // Get balance of the wallet
-          const balance = await USDC_ContractBase.balanceOf(walletAddress)
+          // Validate addresses
+          if (!isValidEthereumAddress(delegatorAddress)) {
+              setError('Invalid delegator address configuration');
+              return;
+          }
+          
+          if (!isValidEthereumAddress(contractAddress)) {
+              setError('Invalid contract address configuration');
+              return;
+          }
+          
+          console.log('Checking caps for wallet:', walletAddress);
+          console.log('Delegator address:', delegatorAddress);
+          console.log('Contract address:', contractAddress);
+          
+          const USDC_ContractBase = new ethers.Contract(contractAddress, ERC20_ABI, Provider)
+          
+          // Get allowance and balance with proper error handling
+          let allowance, balance;
+          
+          try {
+              allowance = await USDC_ContractBase.allowance(delegatorAddress, walletAddress)
+              console.log('Allowance raw value:', allowance);
+          } catch (allowanceError) {
+              console.error('Allowance error:', allowanceError);
+              setError('Failed to fetch allowance. Please check if the contract address is correct.');
+              return;
+          }
+          
+          try {
+              balance = await USDC_ContractBase.balanceOf(walletAddress)
+              console.log('Balance raw value:', balance);
+          } catch (balanceError) {
+              console.error('Balance error:', balanceError);
+              setError('Failed to fetch balance. Please check if the contract address is correct.');
+              return;
+          }
+          
+          // Ensure values are valid before converting
+          if (allowance === null || allowance === undefined || balance === null || balance === undefined) {
+              setError('Failed to fetch contract data. Please try again.');
+              return;
+          }
+          
+          // Convert to BigNumber - works with both ethers v5 and v6
+          let allowanceBN, balanceBN;
+          
+          try {
+              allowanceBN = ethers.BigNumber.from(allowance || '0');
+              balanceBN = ethers.BigNumber.from(balance || '0');
+          } catch (conversionError) {
+              console.error('BigNumber conversion error:', conversionError);
+              setError('Failed to process contract data. Please try again.');
+              return;
+          }
+          
+          console.log('Allowance BigNumber:', allowanceBN);
+          console.log('Balance BigNumber:', balanceBN);
+          
+          // Calculate remaining amount safely
+          let remaining;
+          try {
+              remaining = allowanceBN.sub(balanceBN);
+              console.log('Remaining calculated:', remaining);
+          } catch (calcError) {
+              console.error('Calculation error:', calcError);
+              // If subtraction fails, set remaining to 0
+              remaining = ethers.BigNumber.from(0);
+          }
           
           // Get spending history (this would typically come from events, but for demo we'll simulate)
           const mockSpendingHistory = [
@@ -213,9 +390,9 @@ const Herodash = () => {
 
           setUserCaps({
               address: walletAddress,
-              allowance: formatUnits(allowance.toString(), 6),
-              balance: formatUnits(balance.toString(), 6),
-              remaining: formatUnits(allowance.sub(balance).toString(), 6)
+              allowance: formatUnits(allowanceBN.toString(), 6),
+              balance: formatUnits(balanceBN.toString(), 6),
+              remaining: formatUnits(remaining.toString(), 6)
           });
           
           setSpendingHistory(mockSpendingHistory);
@@ -235,13 +412,40 @@ const Herodash = () => {
           return;
       }
       
+      if (!Signer) {
+          setError('No signer available. Please reconnect your wallet.');
+          return;
+      }
+      
+      // Check if user is on the correct network (Base mainnet)
+      try {
+          const currentChainId = await window.ethereum.request({method: "eth_chainId"});
+          if (currentChainId !== '0x2105') { // Base mainnet chain ID
+              setError('Please switch to Base mainnet to perform this transaction. Click the button below to switch networks.');
+              // Store the current action to perform after network switch
+              setPendingAction('spend');
+              return;
+          }
+      } catch (error) {
+          console.error('Failed to check chain ID:', error);
+          setError('Failed to verify network. Please try again.');
+          return;
+      }
+      
       try {
           setIsSpending(true);
           setError('');
           setSuccess('');
           
+          // Validate amount
+          const amount = parseFloat(AmounttoSpend);
+          if (isNaN(amount) || amount <= 0) {
+              setError('Please enter a valid amount greater than 0');
+              return;
+          }
+          
           const USDC_Transfer_Contract = new ethers.Contract(chainsConfig[1].tokenContractUSDC_Mainnet, ERC20_ABI, Signer)
-          const Transfer = await USDC_Transfer_Contract.transferFrom('0x8f6dB7206B7b617c14fd39B26f48AD36963a48Be',RecepientAcc,parseUnits(AmounttoSpend.toString(),6))
+          const Transfer = await USDC_Transfer_Contract.transferFrom('0x8f6dB7206B7b617c14fd39B26f48AD36963a48Be', RecepientAcc, parseUnits(amount.toString(), 6))
           const Recepit = await Transfer.wait()
           
           setSuccess(`Transaction successful! Hash: ${Recepit.hash.substring(0,6)}...${Recepit.hash.substring(Recepit.hash.length-4)}`);
@@ -252,7 +456,17 @@ const Herodash = () => {
           // Refresh caps after spending
           if (Provider) getCaps();
       } catch(error){
-          setError(`Transaction failed: ${error.message}`);
+          let errorMessage = 'Transaction failed';
+          
+          if (error.code === 'ACTION_REJECTED' || error.message?.includes('user rejected')) {
+              errorMessage = 'Transaction was rejected by user';
+          } else if (error.code === 'INSUFFICIENT_FUNDS') {
+              errorMessage = 'Insufficient funds for transaction';
+          } else if (error.message) {
+              errorMessage = `Transaction failed: ${error.message}`;
+          }
+          
+          setError(errorMessage);
           console.error('Spend error:', error);
       } finally {
           setIsSpending(false);
@@ -265,13 +479,41 @@ const Herodash = () => {
           return;
       }
       
+      if (!Signer) {
+          setError('No signer available. Please reconnect your wallet.');
+          return;
+      }
+      
+      // Check if user is on the correct network (Base mainnet)
+      try {
+          const currentChainId = await window.ethereum.request({method: "eth_chainId"});
+          if (currentChainId !== '0x2105') { // Base mainnet chain ID
+              setError('Please switch to Base mainnet to perform this transaction. Click the button below to switch networks.');
+              // Store the current action to perform after network switch
+              setPendingAction('delegate');
+              return;
+          }
+      } catch (error) {
+          console.error('Failed to check chain ID:', error);
+          setError('Failed to verify network. Please try again.');
+          return;
+      }
+      
       try {
           setIsDelegating(true);
           setError('');
           setSuccess('');
           
+          // Validate amount
+          const amount = parseFloat(AmounttoDelegate);
+          if (isNaN(amount) || amount <= 0) {
+              setError('Please enter a valid amount greater than 0');
+              return;
+          }
+          
           const USDC_Transfer_Contract = new ethers.Contract(chainsConfig[1].tokenContractUSDC_Mainnet, ERC20_ABI, Signer)
-          const delegate = await USDC_Transfer_Contract.approve(DelegatedAcc,parseUnits(AmounttoDelegate.toString(),6))
+          
+          const delegate = await USDC_Transfer_Contract.approve(DelegatedAcc, parseUnits(amount.toString(), 6))
           const Recepit = await delegate.wait()
           
           setSuccess(`Delegation successful! Hash: ${Recepit.hash.substring(0,6)}...${Recepit.hash.substring(Recepit.hash.length-4)}`);
@@ -282,7 +524,17 @@ const Herodash = () => {
           // Refresh caps after delegation
           if (Provider) getCaps();
       } catch(error){
-          setError(`Delegation failed: ${error.message}`);
+          let errorMessage = 'Delegation failed';
+          
+          if (error.code === 'ACTION_REJECTED' || error.message?.includes('user rejected')) {
+              errorMessage = 'Transaction was rejected by user';
+          } else if (error.code === 'INSUFFICIENT_FUNDS') {
+              errorMessage = 'Insufficient funds for transaction';
+          } else if (error.message) {
+              errorMessage = `Delegation failed: ${error.message}`;
+          }
+          
+          setError(errorMessage);
           console.error('Delegate error:', error);
       } finally {
           setIsDelegating(false);
@@ -348,6 +600,15 @@ const Herodash = () => {
               if(_Accounts.length > 0) { 
                   setAccounts(_Accounts)
                   setIsConnected(true)
+                  
+                  // Initialize Provider and Signer if not already set
+                  if (!Provider) {
+                      const _Provider = new ethers.BrowserProvider(window.ethereum);
+                      const _Signer = await _Provider.getSigner();
+                      setProvider(_Provider);
+                      setSigner(_Signer);
+                  }
+                  
                   if(Provider) getCaps()
               } 
           } catch(error){
@@ -366,13 +627,27 @@ const Herodash = () => {
       check()
 
       if (window.ethereum) {
-          window.ethereum.on('accountsChanged',(accounts)=> {
+          window.ethereum.on('accountsChanged',async (accounts)=> {
               if(accounts.length > 0 ){
                   setAccounts(accounts)
-                  if(Provider) getCaps()
+                  
+                  // Update Provider and Signer for new account
+                  try {
+                      const _Provider = new ethers.BrowserProvider(window.ethereum);
+                      const _Signer = await _Provider.getSigner();
+                      setProvider(_Provider);
+                      setSigner(_Signer);
+                      
+                      if(_Provider) getCaps()
+                  } catch (error) {
+                      console.error('Failed to update provider/signer:', error);
+                      setError('Failed to update wallet connection. Please refresh the page.');
+                  }
               } else {
                   setIsConnected(false);
                   setAssignedCaps([]);
+                  setProvider(null);
+                  setSigner(null);
               }
           })
           
@@ -460,6 +735,16 @@ const Herodash = () => {
                             <li>In MetaMask, click "Connect" when prompted</li>
                             <li>Make sure you're on the correct network</li>
                         </ol>
+                    </div>
+                )}
+                {error && error.includes('switch to Base mainnet') && (
+                    <div className="error-help">
+                        <button 
+                            onClick={switchToBaseNetwork}
+                            className="network-switch-btn"
+                        >
+                            🔄 Switch to Base Mainnet
+                        </button>
                     </div>
                 )}
             </div>

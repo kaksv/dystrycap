@@ -1647,6 +1647,38 @@ body.modal-open {
   overflow: hidden;
 }
 
+/* Network switch button styling */
+.network-switch-btn {
+  background: var(--primary) !important;
+  color: var(--white) !important;
+  border: none !important;
+  padding: var(--spacing-sm) var(--spacing-md) !important;
+  border-radius: var(--radius-md) !important;
+  cursor: pointer !important;
+  margin-top: var(--spacing-sm) !important;
+  font-weight: 600 !important;
+  transition: all var(--transition-normal) !important;
+  font-size: 0.9rem !important;
+}
+
+.network-switch-btn:hover {
+  background: var(--primary-light) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.network-switch-btn:active {
+  transform: translateY(0) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+@media (min-width: 768px) {
+  .network-switch-btn {
+    font-size: 1rem !important;
+    padding: var(--spacing-md) var(--spacing-lg) !important;
+  }
+}
+
 /* Desktop-specific enhancements */
 @media (min-width: 1024px) {
   /* Improved hover effects for desktop */
