@@ -241,11 +241,11 @@ const Herodash = () => {
 
           try {
               const USDC_ContractBase = new ethers.Contract(chainsConfig[1].tokenContractUSDC_Mainnet, ERC20_ABI, Provider)
-              const AmountBase = await USDC_ContractBase.allowance('0x8f6dB7206B7b617c14fd39B26f48AD36963a48Be', Accounts[0])
+              const AmountBase = await USDC_ContractBase.allowance('0xDD463C81cb2fA0e95b55c5d7696d8a9755cb1Af2', Accounts[0])
               
               // Ensure AmountBase is a BigNumber
-              const amountBN = ethers.BigNumber.from(AmountBase);
-              Caps.push(formatUnits(amountBN.toString(), 6))
+            //   const amountBN = ethers.BigNumber.from(AmountBase);
+              Caps.push(formatUnits(AmountBase.toString(), 6))
               
               setAssignedCaps(Caps)
           } catch (contractError) {
@@ -299,7 +299,7 @@ const Herodash = () => {
           setSuccess('');
 
           // Check allowance for the input wallet address
-          const delegatorAddress = '0x8f6dB7206B7b617c14fd39B26f48AD36963a48Be';
+          const delegatorAddress = '0xDD463C81cb2fA0e95b55c5d7696d8a9755cb1Af2';
           const contractAddress = chainsConfig[1].tokenContractUSDC_Mainnet;
           
           // Validate addresses
