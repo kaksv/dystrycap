@@ -840,6 +840,13 @@
   }
 }
 
+@media (min-width: 1280px) {
+  .Caps {
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+  }
+}
+
 .Caps:hover {
   background: var(--white);
   box-shadow: var(--shadow-sm);
@@ -885,6 +892,12 @@
   }
 }
 
+@media (min-width: 1280px) {
+  .CapsHead img {
+    height: 2.25rem;
+  }
+}
+
 .CapsHead h3 {
   font-size: 0.85rem;
   font-weight: 600;
@@ -901,6 +914,12 @@
 @media (min-width: 1024px) {
   .CapsHead h3 {
     font-size: 1.05rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .CapsHead h3 {
+    font-size: 1.125rem;
   }
 }
 
@@ -926,6 +945,12 @@
 @media (min-width: 1024px) {
   .capsData h4 {
     font-size: 1.125rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .capsData h4 {
+    font-size: 1.25rem;
   }
 }
 
@@ -1100,6 +1125,15 @@
   }
 }
 
+@media (min-width: 1280px) {
+  #recepient input, #Delegate input {
+    height: 52px;
+    font-size: 1.1rem;
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-xl);
+  }
+}
+
 #recepient input:focus, #Delegate input:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 2px rgba(103, 95, 214, 0.1);
@@ -1151,6 +1185,16 @@
     border-radius: var(--radius-lg);
     min-height: 48px;
     margin-top: var(--spacing-md);
+  }
+}
+
+@media (min-width: 1280px) {
+  #recepient button, #Delegate button {
+    font-size: 1.1rem;
+    padding: var(--spacing-lg) var(--spacing-2xl);
+    border-radius: var(--radius-xl);
+    min-height: 52px;
+    margin-top: var(--spacing-lg);
   }
 }
 
@@ -1510,6 +1554,18 @@
   margin: 0;
 }
 
+@media (min-width: 1024px) {
+  .modal-header h2 {
+    font-size: 1.75rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .modal-header h2 {
+    font-size: 2rem;
+  }
+}
+
 .modal-close {
   background: none;
   border: none;
@@ -1589,6 +1645,58 @@
 /* Prevent body scroll when modal is open */
 body.modal-open {
   overflow: hidden;
+}
+
+/* Desktop-specific enhancements */
+@media (min-width: 1024px) {
+  /* Improved hover effects for desktop */
+  .dashboard {
+    background-attachment: fixed;
+  }
+  
+  /* Better desktop navigation */
+  .header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  /* Enhanced desktop form layout */
+  .input-group {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  /* Better desktop spacing for content sections */
+  .contentArea > div:not(:last-child) {
+    margin-bottom: var(--spacing-lg);
+  }
+}
+
+@media (min-width: 1280px) {
+  /* Large desktop optimizations */
+  .header-content {
+    max-width: 1600px;
+  }
+  
+  .input-group {
+    max-width: 900px;
+  }
+  
+  /* Enhanced desktop grid layout */
+  .contentArea {
+    grid-template-rows: auto auto;
+  }
+}
+
+@media (min-width: 1536px) {
+  /* Extra large desktop optimizations */
+  .header-content {
+    max-width: 1800px;
+  }
+  
+  .input-group {
+    max-width: 1000px;
+  }
 }
 
 
