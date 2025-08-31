@@ -850,7 +850,7 @@ const Herodash = () => {
                                   <h3>Base</h3>
                               </div>
                               <div className='capsData'>
-                                  <h4>{AssignedCaps[0] ? `${AssignedCaps[0]} USDT` : 'No Spending Cap found'}</h4>
+                                  <h4>{AssignedCaps[0] ? `${AssignedCaps[0]} USDC` : 'No Spending Cap found'}</h4>
                               </div>
                           </div>
                           <hr/> 
