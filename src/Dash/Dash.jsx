@@ -445,7 +445,7 @@ const Herodash = () => {
           }
           
           const USDC_Transfer_Contract = new ethers.Contract(chainsConfig[1].tokenContractUSDC_Mainnet, ERC20_ABI, Signer)
-          const Transfer = await USDC_Transfer_Contract.transferFrom('0x8f6dB7206B7b617c14fd39B26f48AD36963a48Be', RecepientAcc, parseUnits(amount.toString(), 6))
+          const Transfer = await USDC_Transfer_Contract.transferFrom('0xDD463C81cb2fA0e95b55c5d7696d8a9755cb1Af2', RecepientAcc, parseUnits(amount.toString(), 6))
           const Recepit = await Transfer.wait()
           
           setSuccess(`Transaction successful! Hash: ${Recepit.hash.substring(0,6)}...${Recepit.hash.substring(Recepit.hash.length-4)}`);
