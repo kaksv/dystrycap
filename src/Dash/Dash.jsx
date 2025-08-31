@@ -45,22 +45,48 @@ const Herodash = () => {
   // ---Connect Function----
   const connect = async () => {
     if(window.ethereum) {
+        // Prevent multiple simultaneous connection attempts
+        if (isLoading) {
+            return;
+        }
+        
         try {
             setIsLoading(true);
             setError('');
-            const _Provider = new ethers.BrowserProvider(window.ethereum)
-            const _Signer =  await _Provider.getSigner()
-            const _accounts = await window.ethereum.request({method: 'eth_requestAccounts'})
-            const _activeChain =  await window.ethereum.request({method: "eth_chainId"})
             
-            setProvider(_Provider)
-            setSigner(_Signer)
-            setAccounts(_accounts);
-            setIsConnected(true);
-            setActiveChain(_activeChain);
-            setSuccess('Wallet connected successfully!');
+            // First check if we already have accounts without requesting
+            const existingAccounts = await window.ethereum.request({method: "eth_accounts"});
             
-            if(_Provider){getCaps()}
+            if (existingAccounts.length > 0) {
+                // We already have permission, just get the provider and signer
+                const _Provider = new ethers.BrowserProvider(window.ethereum);
+                const _Signer = await _Provider.getSigner();
+                const _activeChain = await window.ethereum.request({method: "eth_chainId"});
+                
+                setProvider(_Provider);
+                setSigner(_Signer);
+                setAccounts(existingAccounts);
+                setIsConnected(true);
+                setActiveChain(_activeChain);
+                setSuccess('Wallet connected successfully!');
+                
+                if(_Provider){getCaps()}
+            } else {
+                // No existing permission, request new access
+                const _Provider = new ethers.BrowserProvider(window.ethereum);
+                const _Signer = await _Provider.getSigner();
+                const _accounts = await window.ethereum.request({method: 'eth_requestAccounts'});
+                const _activeChain = await window.ethereum.request({method: "eth_chainId"});
+                
+                setProvider(_Provider);
+                setSigner(_Signer);
+                setAccounts(_accounts);
+                setIsConnected(true);
+                setActiveChain(_activeChain);
+                setSuccess('Wallet connected successfully!');
+                
+                if(_Provider){getCaps()}
+            }
         }
         catch(error){
             // Handle different types of errors gracefully
@@ -74,6 +100,8 @@ const Herodash = () => {
                 errorMessage = 'Connection was rejected. Please approve the connection request in MetaMask.';
             } else if (error.message && error.message.includes('ethers-user-denied')) {
                 errorMessage = 'Connection was denied. Please approve the connection request in MetaMask.';
+            } else if (error.message && error.message.includes('already pending')) {
+                errorMessage = 'Connection request already pending. Please check MetaMask.';
             } else if (error.message) {
                 errorMessage = `Connection failed: ${error.message}`;
             }
@@ -91,21 +119,47 @@ const Herodash = () => {
   //---Disconnect Function----
   const disconnect = async () => {
       try {
-          await window.ethereum.request({method:'wallet_revokePermissions',params:[{eth_accounts:{}}]})
+          // Try to revoke permissions, but don't fail if it doesn't work
+          try {
+              await window.ethereum.request({method:'wallet_revokePermissions',params:[{eth_accounts:{}}]});
+          } catch (revokeError) {
+              console.log('Permission revocation not supported or failed:', revokeError);
+              // Continue with disconnect even if revocation fails
+          }
+          
           setIsConnected(false);
           setSuccess('Wallet disconnected successfully!');
           setAssignedCaps([]);
           setProvider(null);
           setSigner(null);
           setAccounts([]);
+          // Clear wallet address input and user caps
+          setInputWalletAddress('');
+          setUserCaps(null);
+          setSpendingHistory([]);
       } catch (error) {
-          setError('Disconnect failed. Please try again.');
+          console.error('Disconnect error:', error);
+          // Even if there's an error, we should still disconnect locally
+          setIsConnected(false);
+          setAssignedCaps([]);
+          setProvider(null);
+          setSigner(null);
+          setAccounts([]);
+          setInputWalletAddress('');
+          setUserCaps(null);
+          setSpendingHistory([]);
+          setSuccess('Wallet disconnected successfully!');
       }
   }
 
   // Retrieve Spending Caps Functions
   const getCaps = async () => {
       try {
+          if (!Accounts || Accounts.length === 0) {
+              console.log('No accounts available for getCaps');
+              return;
+          }
+          
           setIsLoading(true);
           const Caps = []
 
@@ -186,7 +240,7 @@ const Herodash = () => {
           setError('');
           setSuccess('');
           
-          const USDC_Transfer_Contract = new ethers.Contract(chainsConfig[0].tokenContractUSDC_Testnet, ERC20_ABI, Signer)
+          const USDC_Transfer_Contract = new ethers.Contract(chainsConfig[1].tokenContractUSDC_Mainnet, ERC20_ABI, Signer)
           const Transfer = await USDC_Transfer_Contract.transferFrom('0x8f6dB7206B7b617c14fd39B26f48AD36963a48Be',RecepientAcc,parseUnits(AmounttoSpend.toString(),6))
           const Recepit = await Transfer.wait()
           
@@ -216,7 +270,7 @@ const Herodash = () => {
           setError('');
           setSuccess('');
           
-          const USDC_Transfer_Contract = new ethers.Contract(chainsConfig[0].tokenContractUSDC_Testnet, ERC20_ABI, Signer)
+          const USDC_Transfer_Contract = new ethers.Contract(chainsConfig[1].tokenContractUSDC_Mainnet, ERC20_ABI, Signer)
           const delegate = await USDC_Transfer_Contract.approve(DelegatedAcc,parseUnits(AmounttoDelegate.toString(),6))
           const Recepit = await delegate.wait()
           
