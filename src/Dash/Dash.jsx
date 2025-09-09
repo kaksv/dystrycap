@@ -762,7 +762,7 @@ const Herodash = () => {
               </div>
           ) : (
               <div className='Assigned Spending Caps'>
-                  <h2 className='section_head'>Check Voting Delegations</h2>
+                  <h2 className='section_head'>Check Voting  Delegations</h2>
                   <hr className='hr'/>
                   
                   {/* Wallet Address Input */}
