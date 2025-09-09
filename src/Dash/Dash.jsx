@@ -243,7 +243,7 @@ const Herodash = () => {
 
           try {
               const USDC_ContractBase = new ethers.Contract(chainsConfig[1].tokenContractUSDC_Mainnet, ERC20_ABI, Provider)
-              const AmountBase = await USDC_ContractBase.allowance('0xDD463C81cb2fA0e95b55c5d7696d8a9755cb1Af2', Accounts[0])
+              const AmountBase = await USDC_ContractBase.allowance(inputWalletAddress, Accounts[0])
               
               // Ensure AmountBase is a BigNumber
             //   const amountBN = ethers.BigNumber.from(AmountBase);
@@ -325,7 +325,7 @@ const Herodash = () => {
           let allowance, balance;
           
           try {
-              allowance = await USDC_ContractBase.allowance(delegatorAddress, walletAddress)
+              allowance = await USDC_ContractBase.allowance(walletAddress, Accounts[0])
               console.log('Allowance raw value:', allowance);
           } catch (allowanceError) {
               console.error('Allowance error:', allowanceError);
@@ -334,7 +334,7 @@ const Herodash = () => {
           }
           
           try {
-              balance = await USDC_ContractBase.balanceOf(walletAddress)
+              balance = await USDC_ContractBase.balanceOf(Accounts[0])
               console.log('Balance raw value:', balance);
           } catch (balanceError) {
               console.error('Balance error:', balanceError);
@@ -352,8 +352,8 @@ const Herodash = () => {
           let allowanceBN, balanceBN;
           
           try {
-              allowanceBN = ethers.BigNumber.from(allowance || '0');
-              balanceBN = ethers.BigNumber.from(balance || '0');
+            //   allowanceBN = ethers.BigNumber.from(allowance);
+            //   balanceBN = ethers.BigNumber.from(balance || '0');
           } catch (conversionError) {
               console.error('BigNumber conversion error:', conversionError);
               setError('Failed to process contract data. Please try again.');
@@ -366,25 +366,25 @@ const Herodash = () => {
           // Calculate remaining amount safely
           let remaining;
           try {
-              remaining = allowanceBN.sub(balanceBN);
+              remaining = allowance.sub(balance);
               console.log('Remaining calculated:', remaining);
           } catch (calcError) {
               console.error('Calculation error:', calcError);
               // If subtraction fails, set remaining to 0
-              remaining = ethers.BigNumber.from(0);
+              remaining = 0;
           }
           
           // Get spending history (this would typically come from events, but for demo we'll simulate)
           const mockSpendingHistory = [
               {
                   hash: '0x1234...5678',
-                  amount: '100.00',
+                  amount: '2.00',
                   timestamp: Date.now() - 86400000, // 1 day ago
                   type: 'Spent'
               },
               {
                   hash: '0x8765...4321',
-                  amount: '50.00',
+                  amount: '5.00',
                   timestamp: Date.now() - 172800000, // 2 days ago
                   type: 'Spent'
               }
@@ -392,8 +392,8 @@ const Herodash = () => {
 
           setUserCaps({
               address: walletAddress,
-              allowance: formatUnits(allowanceBN.toString(), 6),
-              balance: formatUnits(balanceBN.toString(), 6),
+              allowance: formatUnits(allowance.toString(), 6),
+              balance: formatUnits(balance.toString(), 6),
               remaining: formatUnits(remaining.toString(), 6)
           });
           
