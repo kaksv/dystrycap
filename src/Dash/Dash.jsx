@@ -6,7 +6,7 @@ import Eth from '../assets/chainlogos/ethlg.svg'
 import Arb from '../assets/chainlogos/arblg.svg'
 import Celo from '../assets/chainlogos/celolg.svg'
 import Op from '../assets/chainlogos/oplg.svg'
-import Uni from '../assets/chainlogos/uinlg.svg'
+import Unlock from '../assets/chainlogos/unlock.webp'
 import Base from '../assets/chainlogos/baselg.svg'
 import {chainsConfig,ERC20_ABI} from './chainConfigs'
 
@@ -49,7 +49,7 @@ const Herodash = () => {
   const isValidEthereumAddress = (address) => {
       return /^0x[a-fA-F0-9]{40}$/.test(address);
   };
-
+ 
   // ---Connect Function----
   const connect = async () => {
     if(window.ethereum) {
@@ -186,6 +186,8 @@ const Herodash = () => {
           await Spend();
       }
   }
+
+  
 
   //---Disconnect Function----
   const disconnect = async () => {
@@ -760,7 +762,7 @@ const Herodash = () => {
               </div>
           ) : (
               <div className='Assigned Spending Caps'>
-                  <h2 className='section_head'>Check Wallet Spending Caps</h2>
+                  <h2 className='section_head'>Check Voting Delegations</h2>
                   <hr className='hr'/>
                   
                   {/* Wallet Address Input */}
@@ -784,7 +786,7 @@ const Herodash = () => {
                                       Checking...
                                   </>
                               ) : (
-                                  'Check Caps'
+                                  'Check Delegation'
                               )}
                           </button>
                       </div>
@@ -797,15 +799,15 @@ const Herodash = () => {
                           <div className="caps-summary">
                               <div className="cap-item">
                                   <span className="cap-label">Total Allowance:</span>
-                                  <span className="cap-value">{userCaps.allowance} USDC</span>
+                                  <span className="cap-value">{userCaps.allowance} UP</span>
                               </div>
                               <div className="cap-item">
                                   <span className="cap-label">Current Balance:</span>
-                                  <span className="cap-value">{userCaps.balance} USDC</span>
+                                  <span className="cap-value">{userCaps.balance} UP</span>
                               </div>
                               <div className="cap-item">
                                   <span className="cap-label">Remaining to Spend:</span>
-                                  <span className="cap-value remaining">{userCaps.remaining} USDC</span>
+                                  <span className="cap-value remaining">{userCaps.remaining} UP</span>
                               </div>
                           </div>
                           
@@ -818,7 +820,7 @@ const Herodash = () => {
                                           <div key={index} className="history-item">
                                               <div className="history-details">
                                                   <span className="history-type">{item.type}</span>
-                                                  <span className="history-amount">{item.amount} USDC</span>
+                                                  <span className="history-amount">{item.amount} UP</span>
                                               </div>
                                               <div className="history-meta">
                                                   <span className="history-hash">{item.hash}</span>
@@ -840,17 +842,17 @@ const Herodash = () => {
                   {isLoading ? (
                       <div className="loading-state">
                           <div className="spinner"></div>
-                          <p>Loading spending caps...</p>
+                          <p>Loading Voting Rights...</p>
                       </div>
                   ) : (
                       <div className = 'caps'>
                           <div className='Caps'>
                               <div className = 'CapsHead' >
-                                  <img src={Base} alt="Base" />
-                                  <h3>Base</h3>
+                                  <img src={Unlock} alt="Base" />
+                                  <h3>UP Token</h3>
                               </div>
                               <div className='capsData'>
-                                  <h4>{AssignedCaps[0] ? `${AssignedCaps[0]} USDC` : 'No Spending Cap found'}</h4>
+                                  <h4>{AssignedCaps[0] ? `${AssignedCaps[0]} UP` : 'No Delegation Found'}</h4>
                               </div>
                           </div>
                           <hr/> 
@@ -911,7 +913,7 @@ const Herodash = () => {
           
           {/* Action Buttons Section */}
           <div className="action-buttons-section">
-              <h2 className='head'>Token Actions</h2>
+              <h2 className='head'>Actions</h2>
               <hr className='hr'/>
               
               <div className="action-buttons-grid">
@@ -920,10 +922,9 @@ const Herodash = () => {
                       onClick={openSpendModal}
                       disabled={!isConnected}
                   >
-                      <div className="action-icon">💸</div>
                       <div className="action-content">
-                          <h3>Spend Tokens</h3>
-                          <p>Send USDC tokens to another address</p>
+                          <h3>Cancel Delegation</h3>
+                          <p>Revoke UP Voting Rights</p>
                       </div>
                   </button>
                   
@@ -932,10 +933,9 @@ const Herodash = () => {
                       onClick={openDelegateModal}
                       disabled={!isConnected}
                   >
-                      <div className="action-icon">🔐</div>
                       <div className="action-content">
-                          <h3>Assign Spending Amounts</h3>
-                          <p>Delegate spending authority to another address</p>
+                          <h3>Assign Voting Rights</h3>
+                          <p>Delegate voting rights</p>
                       </div>
                   </button>
               </div>
@@ -947,7 +947,7 @@ const Herodash = () => {
             <div className="modal-overlay" onClick={handleModalBackdropClick}>
                 <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                     <div className="modal-header">
-                        <h2>Spend Tokens</h2>
+                        <h2>Cancel Delegation</h2>
                         <button className="modal-close" onClick={closeSpendModal}>
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -965,7 +965,7 @@ const Herodash = () => {
                         </div>
                         
                         <div id='recepient'>
-                            <h4>Enter recipient's address</h4>
+                            <h4>Enter Delegatee's address</h4>
                             <input 
                                 type="text" 
                                 placeholder='0xF94CC1Eb19C43d73Eec9e55c13494abe1dfFb648' 
@@ -976,7 +976,7 @@ const Herodash = () => {
                             <h4>Enter amount</h4>
                             <input 
                                 type="number" 
-                                placeholder='0.25' 
+                                placeholder='10 UP' 
                                 value={AmounttoSpend} 
                                 onChange={(e)=>{setAmounttoSpend(e.target.value);}}
                                 disabled={!isConnected}
@@ -985,10 +985,10 @@ const Herodash = () => {
                             />
                             <button 
                                 onClick={Spend}
-                                disabled={!isConnected || isSpending || !RecepientAcc || !AmounttoSpend}
+                                disabled={!isConnected || isSpending || !RecepientAcc}
                                 className={isSpending ? 'loading' : ''}
                             >
-                                {isSpending ? 'Sending...' : 'Send USDC'}
+                                {isSpending ? 'Revoking...' : 'Revoke Rights'}
                             </button>
                         </div>
                     </div>
@@ -1001,7 +1001,7 @@ const Herodash = () => {
             <div className="modal-overlay" onClick={handleModalBackdropClick}>
                 <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                     <div className="modal-header">
-                        <h2>Assign Spending Amounts</h2>
+                        <h2>Assign Voting Rights</h2>
                         <button className="modal-close" onClick={closeDelegateModal}>
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1019,7 +1019,7 @@ const Herodash = () => {
                         </div>
                         
                         <div id='Delegate'>
-                            <h4>Enter delegate's address</h4>
+                            <h4>Enter Delegatee's address</h4>
                             <input 
                                 type="text" 
                                 placeholder='0xF94CC1Eb19C43d73Eec9e55c13494abe1dfFb648' 
@@ -1030,7 +1030,7 @@ const Herodash = () => {
                             <h4>Enter amount</h4>
                             <input 
                                 type="number" 
-                                placeholder='0.25' 
+                                placeholder='10 UP' 
                                 value={AmounttoDelegate} 
                                 onChange={(e)=>{setAmounttoDelegate(e.target.value);}}
                                 disabled={!isConnected}
